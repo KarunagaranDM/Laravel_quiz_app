@@ -37,11 +37,12 @@ const ResultPage = () => {
     const incorrectAnswers = totalQuestions - correctAnswers;
     const feedback = results.feedback || '';
     const score = results.score_percentage || '';
+    const detailedResults = results.detailed_results || [];
 
     return (
         <div>
-            <Header />
-            <div className="d-flex flex-column justify-content-center align-items-center" style={{ height: '100vh' }}>
+            <Header className="mb-4" />
+            <div className="d-flex flex-column justify-content-center align-items-center mt-5">
                 <div className="custom-card w-50 text-center">
                     <h1 className="">Quiz Results</h1>
                     <div className='d-flex justify-content-center align-items-center mt-5'>
@@ -68,6 +69,30 @@ const ResultPage = () => {
 
                     <div class="alert alert-primary mt-2" role="alert">
                         Info : {feedback}
+                    </div>
+
+                    <div>
+                        <table class="table table-bordered mt-4">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Question No</th>
+                                    <th scope="col">Correct Answer</th>
+                                    <th scope="col">Your Answer</th>
+                                </tr>
+                            </thead>
+                            <tbody >
+                                {detailedResults.map((result, index) => {
+                                    return (
+                                        <tr key={result.question_id}>
+                                            <td>{index + 1}</td>
+                                            <td>{result.correct_answer ?? 'Not Answered'}</td>
+                                            <td className={result.is_correct ? 'text-success' : 'text-danger'}>{result.user_answer ?? 'Not Answered'}</td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </table>
+
                     </div>
 
                     <button
