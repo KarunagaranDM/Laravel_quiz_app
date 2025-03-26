@@ -1,0 +1,36 @@
+.auth-card {
+    width: 350px;
+    border-radius: 10px;
+    padding: 20px;
+    background: #fff;
+}
+
+.eye-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.eye-icon:hover {
+    color: #495057;
+}
+
+.switch-mode:hover {
+    text-decoration: underline;
+}
+
+.switch-mode {
+    cursor: pointer;
+    color: #6c757d; 
+    font-size: 14px;
+}
+
+.switch-mode span {
+    color: #007bff;
+    text-decoration: underline;
+}
