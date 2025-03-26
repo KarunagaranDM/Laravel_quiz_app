@@ -13,7 +13,6 @@ class QuestionController extends Controller
 {
     public function index()
     {
-        // Explicitly return JSON response
         return response()->json(
             Question::inRandomOrder()->limit(5)->get()
         );
@@ -22,17 +21,17 @@ class QuestionController extends Controller
     public function submitQuiz(Request $request)
     {
         try {
-            // Validate the request
             $validatedData = $request->validate([
                 'questions' => 'required|array|min:1',
                 'answers' => 'required|array',
                 'answers.*' => 'nullable|string',
+                'user_id' => 'required|exists:users,id',
             ]);
 
             $questions = $request->input('questions', []);
             $answers = $request->input('answers', []);
+            $userId = $request->input('user_id');
 
-            // Check if questions are provided
             $totalQuestions = count($questions);
             if ($totalQuestions === 0) {
                 return response()->json([
@@ -41,12 +40,12 @@ class QuestionController extends Controller
                 ], 400);
             }
 
-            // Calculate results
             $correctAnswers = 0;
             $detailedResults = [];
 
-            // Fetch correct answers from the database
             $dbQuestions = Question::whereIn('id', array_column($questions, 'id'))->get()->keyBy('id');
+
+            $resultEntries = [];
 
             foreach ($questions as $question) {
                 $questionId = $question['id'];
@@ -71,26 +70,28 @@ class QuestionController extends Controller
                     'correct_answer' => $dbQuestion->correct_answer,
                     'is_correct' => $isCorrect
                 ];
+
+                $resultEntries[] = [
+                    'user_id' => $userId,
+                    'question_id' => $questionId,
+                    'score' => $isCorrect ? 1 : 0,
+                    'answers' => json_encode([$questionId => $userAnswer]),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
             }
 
-            // Calculate score
             $scorePercentage = $totalQuestions > 0
                 ? round(($correctAnswers / $totalQuestions) * 100, 2)
                 : 0;
 
-            // Save result without user_id (if Result model allows nullable user_id)
-            $result = Result::create([
-                'score' => $scorePercentage,
-                'answers' => $answers
-            ]);
+            Result::insert($resultEntries);
 
-            // Generate feedback
             $feedback = $this->generateFeedback($scorePercentage);
 
             return response()->json([
                 'success' => true,
                 'result' => [
-                    'id' => $result->id,
                     'total_questions' => $totalQuestions,
                     'correct_answers' => $correctAnswers,
                     'score_percentage' => $scorePercentage,
@@ -114,6 +115,7 @@ class QuestionController extends Controller
             ], 500);
         }
     }
+
 
     private function generateFeedback($percentage)
     {

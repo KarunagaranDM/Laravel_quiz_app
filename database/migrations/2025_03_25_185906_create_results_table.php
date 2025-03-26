@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable(); // Make it nullable
+            $table->foreignId('user_id')->nullable();
+            $table->foreignId('question_id')->nullable();
             $table->float('score');
             $table->json('answers');
             $table->timestamps();
 
-            // Foreign key constraint
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('question_id')->references('id')->on('questions')->onDelete('set null');
         });
     }
 

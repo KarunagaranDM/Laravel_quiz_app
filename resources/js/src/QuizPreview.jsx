@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Header from './header';
+import { AuthContext } from "./AuthContext";
 
 const QuizPreview = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { user, logout } = useContext(AuthContext);
 
     const { questions, answers } = location.state || { questions: [], answers: {} };
 
@@ -18,7 +20,11 @@ const QuizPreview = () => {
 
         try {
             const token = localStorage.getItem('token');
-            if (!token) {
+            const userId = user.id;
+            console.log(userId);
+
+
+            if (!token || !userId) {
                 navigate('/login');
                 return;
             }
@@ -26,6 +32,7 @@ const QuizPreview = () => {
             const submissionData = {
                 questions: questions,
                 answers: answers,
+                user_id: parseInt(userId), // Convert to integer
                 timestamp: new Date().toISOString()
             };
 
@@ -46,6 +53,7 @@ const QuizPreview = () => {
 
             if (error.response?.status === 401) {
                 localStorage.removeItem('token');
+                localStorage.removeItem('user_id');
                 navigate('/login');
                 return;
             }
@@ -64,6 +72,7 @@ const QuizPreview = () => {
             setIsSubmitting(false);
         }
     };
+
     const handleEdit = () => {
         navigate(-1);
     };
